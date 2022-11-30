@@ -1,51 +1,12 @@
-local switch = true;
-local value = if switch then "z" else "x";
+local k = import "k.libsonnet";
 
-local Deployment(name, replicas=1) = {
-    apiVersion: "apps/v1",
-    kind: "Deployment",
-    metadata: {
-        name: name,
-    },
-    spec: {
-        selector: {
-            matchLabels: {
-                run: name,
-            },
-        },
-        replicas: replicas,
-        template: {
-            metadata: {
-                labels: {
-                    run: name,
-                },
-            },
-            spec: {
-                containers: [{
-                    name: name,
-                    image: "nginx",
-                    ports: [{containerPort: 80}],
-                }],
-            },
-        },
-    },
-};
-
-local deployment = Deployment("some-app") {
-    spec+: {
-        template+:{
-            spec+:{
-                volumes: [
-                    {
-                        name: "config",
-                        configMap: {
-                            name: "config",
-                        },
-                    },
-                ],
-            },
-        },
-    },
-};
-
-deployment
+{
+    nginx: k.apps.v1.deployment.new(
+        name="nginx",
+        replicas=1,
+        containers=[k.core.v1.container.new(
+            name="nginx",
+            image="nginx",
+        )]
+    )
+}
